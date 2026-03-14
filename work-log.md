@@ -2,6 +2,166 @@
 
 ---
 
+## 2026-03-14 (세션 8 — git 초기화 + TCL TV 기능 추가 + 문서 정비)
+
+### 개요
+git 초기 설정, TCL TV 입력 전환/페어링 기능 전체 구현,
+`POST /key/pip/move` 신규 엔드포인트, 개발 문서(README, API-SPEC) 전면 재작성.
+
+---
+
+### 1. git 초기 설정
+
+- `.gitignore` 생성: `__pycache__/`, `*.log`, `build/`, `dist/`, `edge-profile/`, `backup/`, `atem.spec`, `atem.conf`, `.claude/`, `*.pem`, `*.key`
+- `.gitattributes` 생성: `* text=auto eol=lf`, `.bat`/`.ps1`은 CRLF
+- `atem.conf.example` 생성: 실제 conf 대신 예시 파일 커밋
+- 초기 커밋 (57개 파일)
+
+---
+
+### 2. TCL TV 입력 전환 + 페어링 기능
+
+#### 배경
+TCL TV(75P635 등) 입력 소스를 ATEM 패널에서 함께 제어하고자 함.
+`androidtvremote2` 라이브러리 사용 (Android TV Remote 프로토콜, TLS, 포트 6466).
+
+#### 구현 파일
+
+**`controller/tcl_controller.py`** (신규)
+- persistent 연결 풀 (`_pool: dict[ip → AndroidTVRemote]`)
+- `send_command(ip, port, keycode)`: 연결 → 준비 대기 → 키 이벤트 전송
+- `start_pairing(ip)` / `finish_pairing(ip, pin)`: TLS 기반 1회 페어링 흐름
+- `keep_reconnecting()`: 끊기면 자동 재연결
+- `CERT_FILE`, `KEY_FILE`: `BASE_DIR/tcl_cert.pem`, `tcl_key.pem` (gitignore 처리됨)
+
+**`service/tcl_service.py`** (신규)
+- `switch_input(tv_index, input_index)`: 단일 TV 입력 전환
+- `switch_input_all(input_index)`: 전체 TV asyncio.gather 병렬 전환
+- `start_pairing()` / `finish_pairing()`: 페어링 위임
+- `get_status()`: TV별 TCP 핑 + 설정 반환
+
+**`router/tcl_router.py`** (신규)
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| POST | `/tcl/input` | 특정 TV 입력 전환 |
+| POST | `/tcl/input/all` | 전체 TV 입력 일괄 전환 |
+| GET | `/tcl/status` | 연결 상태 + 설정 조회 |
+| POST | `/tcl/pair/start` | 페어링 시작 (TV 화면에 PIN 표시) |
+| POST | `/tcl/pair/finish` | PIN 입력으로 페어링 완료 |
+
+**`conf_manager.py`**: `[tcl]` 섹션 기본값 추가 (enabled, port, tv1~3, input1~4 name/cmd)
+
+**`config.py`**: `TCL_ENABLED`, `TCL_PORT`, `TCL_TVS`, `TCL_INPUT_NAMES`, `TCL_INPUT_COMMANDS` 추가 + `reload()` 반영
+
+**`router/config_router.py`**: `ConfigBody`에 TCL 필드 추가, GET/POST `/api/config` 반영
+
+#### 호환성 주의
+- **TCL 65P635 / 75P635**: Google TV 기반 — `androidtvremote2` 홈 화면 이동만 지원
+- `KEYCODE_TV_INPUT_HDMI_*` 키코드 동작 안 함
+- API 응답은 `ok: true`지만 TV 화면 변경 없음
+
+---
+
+### 3. POST /key/pip/move 신규 엔드포인트
+
+PiP가 이미 on-air 상태에서 소스/크기 변경 없이 위치만 즉시 이동.
+
+**`model/request.py`**: `PiPMove { pos_x: float, pos_y: float }` 추가
+
+**`router/keyer.py`**: `POST /key/pip/move` 추가
+
+**`service/atem_service.py`**: `move_pip(pos_x, pos_y)` — keyer 토글 없이 `set_dve_position()` 직접 호출
+
+**`controller/atem_controller.py`**: `set_keyer_fly_enabled(enabled)` 메서드 추가
+
+**`static/js/panel.js`**: PiP 위치 버튼 클릭 시:
+- keyer_mode가 'pip'이면 → `POST /key/pip/move` (소스 유지)
+- off 상태이면 → `POST /key/pip` (새로 활성화)
+
+---
+
+### 4. 프론트엔드 TCL TV 패널
+
+**`static/atem_ui.html`**: TCL TV 패널 섹션 추가 (TV 선택 + 입력 버튼 + 결과 메시지)
+
+**`static/css/ui.css`**: grid-area에 `tcl` 행 추가
+
+**`static/js/ui.js`**: `loadTclPanel()`, `tclSwitchInput()`, TV 선택 상태 관리
+
+**`static/config.html`**: TCL TV 설정 섹션 추가 (활성화 토글, 포트, TV IP/이름, 페어링 버튼, 입력 소스 이름/키코드)
+
+**`static/css/config.css`**: `.section-sublabel`, `.btn-pair` 스타일 추가
+
+**`static/js/config.js`**: TCL 설정 로드/저장, `tclPairStart()` / `tclPairFinish()` / `tclPairCancel()` 페어링 UI
+
+---
+
+### 5. main.py 개선
+
+- `tcl_router` 등록
+- 종료 시 task 정리: `asyncio.wait_for(shield(task), timeout=1.5)` 로 안정화
+- Windows Ctrl+C 핸들러 추가: 3초 내 정리 안 되면 `os._exit(0)` 강제 종료
+
+---
+
+### 6. 문서 정비
+
+- `README.md` + `API-SPEC.md` 소스 기준으로 전면 재작성
+  - TCL TV 기능 전체 추가
+  - 프로젝트 구조 현행화 (header.js, config.css, atem_udp_server.py 등)
+  - 테스트 수 실측값 반영 (150 → 140)
+  - PiP 좌표계 수정 (±1.0 → pos_x ±16.0, pos_y ±9.0)
+  - `/sim/state` 제거 (삭제된 엔드포인트)
+  - `admin/connect` 누락 추가
+
+---
+
+### 커밋 목록
+
+| 해시 | 내용 |
+|------|------|
+| `9cc9009` | Initial commit: ATEM Controller web application |
+| `59ec36b` | docs: 소스 코드 기준으로 개발 문서 전면 업데이트 |
+| `b04c250` | docs: TCL TV 기능 추가 반영 및 전체 문서 재작성 |
+| `968e4db` | chore: .gitignore에 TLS 인증서/키 파일 추가 |
+| `6a5a0d9` | feat: TCL TV 입력 전환 및 페어링 기능 추가 |
+| `8da5f7c` | feat: POST /key/pip/move — PiP 위치 이동 엔드포인트 추가 |
+| `04a2256` | feat: UI에 TCL TV 패널 추가 및 PiP 이동 로직 개선 |
+| `3eafbb5` | docs: TCL 65P635/75P635 모델 입력 전환 미지원 주의사항 추가 |
+
+---
+
+### 변경 파일 요약
+
+| 파일 | 유형 | 내용 |
+|------|------|------|
+| `.gitignore` | 신규 | 빌드/런타임/인증서 파일 제외 |
+| `.gitattributes` | 신규 | LF/CRLF 통일 |
+| `atem.conf.example` | 신규 | 설정 예시 파일 |
+| `controller/tcl_controller.py` | 신규 | TCL TV TLS 연결 풀 + 페어링 |
+| `service/tcl_service.py` | 신규 | TCL 입력 전환 비즈니스 로직 |
+| `router/tcl_router.py` | 신규 | TCL API 엔드포인트 5개 |
+| `conf_manager.py` | 수정 | TCL 설정 섹션 기본값 추가 |
+| `config.py` | 수정 | TCL 변수 추가 + reload() 반영 |
+| `router/config_router.py` | 수정 | TCL 필드 ConfigBody + GET/POST 반영 |
+| `main.py` | 수정 | tcl_router 등록, 종료 개선, Ctrl+C 핸들러 |
+| `model/request.py` | 수정 | `PiPMove` 모델 추가 |
+| `router/keyer.py` | 수정 | `/pip/move` 엔드포인트 추가 |
+| `service/atem_service.py` | 수정 | `move_pip()` 추가 |
+| `controller/atem_controller.py` | 수정 | `set_keyer_fly_enabled()` 추가 |
+| `static/atem_ui.html` | 수정 | TCL 패널 섹션 추가 |
+| `static/css/ui.css` | 수정 | tcl grid-area 추가 |
+| `static/js/ui.js` | 수정 | TCL 패널 로직 추가 |
+| `static/config.html` | 수정 | TCL 설정 섹션 추가 |
+| `static/css/config.css` | 수정 | section-sublabel, btn-pair 스타일 |
+| `static/js/config.js` | 수정 | TCL 설정 로드/저장 + 페어링 UI |
+| `static/js/panel.js` | 수정 | PiP 이동 시 on-air 여부 판단 |
+| `README.md` | 수정 | 전면 재작성 |
+| `API-SPEC.md` | 수정 | 전면 재작성 |
+
+---
+
 ## 2026-03-08 (세션 7 — PyATEMMax 분석 + Flying Key 수정 + 패널 PiP 위치 버튼)
 
 ### 개요
