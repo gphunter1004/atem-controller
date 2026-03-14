@@ -70,6 +70,13 @@ class ATEMService:
         state.dve_pos_y = pos_y
         atem.set_keyer_on_air(True)
 
+    def move_pip(self, pos_x: float, pos_y: float):
+        """PiP 위치만 변경 — 이미 on-air 상태에서 keyer 토글 없이 즉시 이동."""
+        state.touch()
+        state.dve_pos_x = pos_x
+        state.dve_pos_y = pos_y
+        atem.set_dve_position(pos_x, pos_y)
+
     def set_transition_style(self, style: str):
         state.touch()
         state.transition_style = style.upper()

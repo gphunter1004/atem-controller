@@ -68,6 +68,11 @@ class ATEMController:
         keyer_type = "dve" if _is_simulator else PyATEMMax.ATEMKeyerTypes.dVE
         self._cmd(lambda: self.switcher.setKeyerType(0, 0, keyer_type))
 
+    def set_keyer_fly_enabled(self, enabled: bool):
+        if _is_simulator:
+            return
+        self._cmd(lambda: self.switcher.setKeyerFlyEnabled(0, 0, enabled))
+
     def set_dve_size(self, size: float):
         self._cmd(lambda: self.switcher.setKeyDVESizeX(0, 0, size))
         self._cmd(lambda: self.switcher.setKeyDVESizeY(0, 0, size))

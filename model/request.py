@@ -12,3 +12,7 @@ class PiPConfig(BaseModel):
     size:   float = Field(0.25,  ge=0.0,  le=1.0)
     pos_x:  float = Field(12.0,  ge=-16.0, le=16.0)
     pos_y:  float = Field(7.0,   ge=-9.0,  le=9.0)
+
+class PiPMove(BaseModel):
+    pos_x: float = Field(..., ge=-16.0, le=16.0)
+    pos_y: float = Field(..., ge=-9.0,  le=9.0)
