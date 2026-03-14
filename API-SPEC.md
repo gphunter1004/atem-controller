@@ -19,8 +19,8 @@ Base URL: `http://<host>:8000`
   "mode": "대기중",
   "keyer_mode": "off",
   "dve_size": 0.25,
-  "dve_pos_x": 0.62,
-  "dve_pos_y": 0.35,
+  "dve_pos_x": 12.0,
+  "dve_pos_y": 7.0,
   "last_transition": "",
   "transition_style": "MIX",
   "atem_connected": false
@@ -35,8 +35,8 @@ Base URL: `http://<host>:8000`
 | `mode` | string | 마지막 동작 설명 |
 | `keyer_mode` | `"off"` \| `"keyup"` \| `"pip"` | 키어 상태 |
 | `dve_size` | float (0~1) | DVE 크기 |
-| `dve_pos_x` | float (-1~1) | DVE X 위치 |
-| `dve_pos_y` | float (-1~1) | DVE Y 위치 |
+| `dve_pos_x` | float (-16~16) | DVE X 위치 |
+| `dve_pos_y` | float (-9~9) | DVE Y 위치 |
 | `last_transition` | `""` \| `"CUT"` \| `"AUTO"` | 마지막 전환 방식 |
 | `transition_style` | `"MIX"` \| `"DIP"` \| `"WIPE"` \| `"STING"` | 트랜지션 스타일 |
 | `atem_connected` | bool | ATEM 장비 연결 여부 |
@@ -168,8 +168,8 @@ PiP (DVE 키어) ON.
 {
   "source": 1,
   "size": 0.25,
-  "pos_x": 0.62,
-  "pos_y": 0.35
+  "pos_x": 12.0,
+  "pos_y": 7.0
 }
 ```
 
@@ -177,8 +177,29 @@ PiP (DVE 키어) ON.
 |------|------|--------|------|
 | `source` | int | — | 1~4 |
 | `size` | float | `0.25` | 0.0~1.0 |
-| `pos_x` | float | `0.62` | -1.0~1.0 |
-| `pos_y` | float | `0.35` | -1.0~1.0 |
+| `pos_x` | float | `12.0` | -16.0~16.0 |
+| `pos_y` | float | `7.0` | -9.0~9.0 |
+
+**응답:** StatusObject
+
+---
+
+### `POST /key/pip/move`
+
+PiP 위치만 이동 (소스 및 크기 변경 없음).
+
+**요청:**
+```json
+{
+  "pos_x": -12.0,
+  "pos_y": 7.0
+}
+```
+
+| 필드 | 타입 | 제약 |
+|------|------|------|
+| `pos_x` | float | -16.0~16.0 |
+| `pos_y` | float | -9.0~9.0 |
 
 **응답:** StatusObject
 
@@ -215,8 +236,8 @@ PiP (DVE 키어) ON.
         "mode": "keyup",
         "source": 2,
         "size": 0.25,
-        "pos_x": 0.62,
-        "pos_y": 0.35
+        "pos_x": 12.0,
+        "pos_y": 7.0
       },
       "confirm": false
     }
@@ -255,9 +276,9 @@ PiP (DVE 키어) ON.
 | `pvw` | int (1~4) | — | PVW 소스 |
 | `keyer.mode` | `"keyup"` \| `"pip"` \| `"off"` | — | 키어 모드 |
 | `keyer.source` | int (1~4) | — | 키어 소스 |
-| `keyer.size` | float | — | DVE 크기 (pip 전용) |
-| `keyer.pos_x` | float | — | DVE X 위치 (pip 전용) |
-| `keyer.pos_y` | float | — | DVE Y 위치 (pip 전용) |
+| `keyer.size` | float (0~1) | — | DVE 크기 (pip 전용) |
+| `keyer.pos_x` | float (-16~16) | — | DVE X 위치 (pip 전용) |
+| `keyer.pos_y` | float (-9~9) | — | DVE Y 위치 (pip 전용) |
 | `confirm` | bool | — | true = 두 번 클릭 필요 |
 
 **응답:**
@@ -327,6 +348,97 @@ ATEM 장비 수동 재연결 (10초 타임아웃 1회 시도).
 
 ---
 
+## TCL TV 제어
+
+TCL TV 입력 소스 전환 및 페어링.
+
+> `TCL_ENABLED = True`일 때만 동작합니다.
+
+### `POST /tcl/input`
+
+특정 TV 입력 소스 전환.
+
+**요청:**
+```json
+{ "tv": 1, "input": 2 }
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `tv` | int (1-based) | TV 번호 |
+| `input` | int (1-based) | 입력 소스 번호 |
+
+**응답:**
+```json
+{ "ok": true, "tv": 1, "input": 2 }
+```
+
+**응답 (실패):**
+```json
+{ "ok": false, "tv": 1, "input": 2, "detail": "연결 실패 메시지" }
+```
+
+---
+
+### `POST /tcl/input/all`
+
+전체 TV 입력 소스 일괄 전환.
+
+**요청:**
+```json
+{ "input": 2 }
+```
+
+**응답:**
+```json
+{
+  "results": [
+    { "ok": true, "tv": 1, "input": 2 },
+    { "ok": false, "tv": 2, "input": 2, "detail": "..." }
+  ]
+}
+```
+
+---
+
+### `GET /tcl/status`
+
+TCL TV 상태 및 설정 조회.
+
+---
+
+### `POST /tcl/pair/start`
+
+TV 페어링 시작 (TV 화면에 PIN 표시).
+
+**요청:**
+```json
+{ "tv": 1 }
+```
+
+**응답:**
+```json
+{ "ok": true, "tv": 1, "message": "TV 화면의 PIN을 입력하세요" }
+```
+
+---
+
+### `POST /tcl/pair/finish`
+
+TV 페어링 완료 (PIN 입력).
+
+**요청:**
+```json
+{ "tv": 1, "pin": "123456" }
+```
+
+**응답:**
+```json
+{ "ok": true, "tv": 1 }
+```
+
+---
+
 ## 설정 (Config)
 
 ### `GET /api/config`
@@ -341,9 +453,23 @@ ATEM 장비 수동 재연결 (10초 타임아웃 1회 시도).
   "simulator_mode": false,
   "api_port": 8000,
   "transition_rate_frames": 15,
-  "device_sync_interval": 2,
+  "device_sync_interval": 1,
   "show_console": false,
   "source_names": ["소스1(Camera)", "소스2(PPT)", "소스3(없음)", "소스4(없음)"],
+  "tcl_enabled": false,
+  "tcl_port": 6466,
+  "tcl_tvs": [
+    { "ip": "", "name": "TV 1" },
+    { "ip": "", "name": "TV 2" },
+    { "ip": "", "name": "TV 3" }
+  ],
+  "tcl_input_names": ["HDMI 1", "HDMI 2", "HDMI 3", "HDMI 4"],
+  "tcl_input_cmds": [
+    "KEYCODE_TV_INPUT_HDMI_1",
+    "KEYCODE_TV_INPUT_HDMI_2",
+    "KEYCODE_TV_INPUT_HDMI_3",
+    "KEYCODE_TV_INPUT_HDMI_4"
+  ],
   "conf_file": "C:\\Program Files\\Atem Controller\\atem.conf",
   "conf_exists": true
 }
@@ -355,28 +481,19 @@ ATEM 장비 수동 재연결 (10초 타임아웃 1회 시도).
 
 설정 저장 및 즉시 반영 가능한 항목 적용.
 
-**요청:**
-```json
-{
-  "atem_ip": "192.168.0.240",
-  "atem_port": 9910,
-  "simulator_mode": false,
-  "api_port": 8000,
-  "transition_rate_frames": 15,
-  "device_sync_interval": 2,
-  "show_console": false,
-  "source_names": ["소스1", "소스2", "소스3", "소스4"]
-}
-```
-
 | 필드 | 즉시 반영 | 제약 | 설명 |
 |------|-----------|------|------|
 | `atem_ip` | ⚡ | — | ATEM IP 주소 |
-| `atem_port` | ⚡ | 1~65535 | ATEM UDP 포트 (기본 9910) |
+| `atem_port` | ⚡ | 1~65535 | ATEM UDP 포트 |
 | `transition_rate_frames` | ⚡ | 1~300 | AUTO 전환 속도 (프레임) |
 | `device_sync_interval` | ⚡ | 1~60 | 장비 상태 동기화 주기 (초) |
 | `show_console` | ⚡ | — | 콘솔 창 표시 (EXE 환경만) |
 | `source_names` | ⚡ | 4개 배열 | 소스 이름 |
+| `tcl_enabled` | ⚡ | — | TCL TV 제어 활성화 |
+| `tcl_port` | ⚡ | 1~65535 | TCL TLS 포트 |
+| `tcl_tvs` | ⚡ | 배열 | TV 목록 (ip, name) |
+| `tcl_input_names` | ⚡ | 4개 배열 | 입력 소스 이름 |
+| `tcl_input_cmds` | ⚡ | 4개 배열 | 입력 전환 키코드 |
 | `simulator_mode` | 🔄 재시작 필요 | — | 시뮬레이터 모드 |
 | `api_port` | 🔄 재시작 필요 | 1~65535 | 서버 포트 |
 
