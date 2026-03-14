@@ -107,6 +107,73 @@
       <div class="field"><span class="instant-apply" title="저장 즉시 반영">⚡</span><label for="name4">소스 4</label><input type="text" id="name4"></div>
     </section>
 
+    <!-- TCL TV -->
+    <section class="cfg-section">
+      <div class="section-label">TCL TV</div>
+
+      <div class="field">
+        <span class="instant-apply" title="저장 즉시 반영">⚡</span>
+        <label for="tcl_enabled">TCL 제어 활성화</label>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="tcl_enabled">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-desc" id="tcl-enabled-desc"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="instant-apply" title="저장 즉시 반영">⚡</span>
+        <label for="tcl_port">TCP 포트</label>
+        <input type="number" id="tcl_port" min="1" max="65535" placeholder="4001">
+      </div>
+
+      <div class="section-sublabel">TV 목록 &amp; 페어링</div>
+      <div class="field"><label>TV 1</label>
+        <input type="text" id="tcl_tv1_ip"   placeholder="192.168.0.x" style="width:130px;margin-right:6px" spellcheck="false">
+        <input type="text" id="tcl_tv1_name" placeholder="TV 1 이름" style="width:90px;margin-right:6px">
+        <button type="button" class="btn-pair" onclick="tclPairStart(1)">페어링</button>
+      </div>
+      <div class="field"><label>TV 2</label>
+        <input type="text" id="tcl_tv2_ip"   placeholder="192.168.0.x" style="width:130px;margin-right:6px" spellcheck="false">
+        <input type="text" id="tcl_tv2_name" placeholder="TV 2 이름" style="width:90px;margin-right:6px">
+        <button type="button" class="btn-pair" onclick="tclPairStart(2)">페어링</button>
+      </div>
+      <div class="field"><label>TV 3</label>
+        <input type="text" id="tcl_tv3_ip"   placeholder="192.168.0.x" style="width:130px;margin-right:6px" spellcheck="false">
+        <input type="text" id="tcl_tv3_name" placeholder="TV 3 이름" style="width:90px;margin-right:6px">
+        <button type="button" class="btn-pair" onclick="tclPairStart(3)">페어링</button>
+      </div>
+
+      <!-- 페어링 PIN 입력 -->
+      <div id="tcl-pair-box" style="display:none;margin-top:10px;padding:12px;background:var(--bg);border:1px solid var(--blue);border-radius:6px">
+        <div id="tcl-pair-msg" style="font-family:var(--mono);font-size:12px;color:var(--blue);margin-bottom:8px"></div>
+        <input type="text" id="tcl-pair-pin" placeholder="TV 화면의 PIN 입력" maxlength="10"
+               style="width:160px;margin-right:8px" spellcheck="false">
+        <button type="button" class="btn-pair" onclick="tclPairFinish()">완료</button>
+        <button type="button" style="margin-left:6px;background:none;border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:4px;cursor:pointer;font-size:12px" onclick="tclPairCancel()">취소</button>
+      </div>
+
+      <div class="section-sublabel">입력 소스</div>
+      <div class="field"><label>입력 1</label>
+        <input type="text" id="tcl_in1_name" placeholder="HDMI 1" style="width:100px;margin-right:6px">
+        <input type="text" id="tcl_in1_cmd"  placeholder="HDMI1">
+      </div>
+      <div class="field"><label>입력 2</label>
+        <input type="text" id="tcl_in2_name" placeholder="HDMI 2" style="width:100px;margin-right:6px">
+        <input type="text" id="tcl_in2_cmd"  placeholder="HDMI2">
+      </div>
+      <div class="field"><label>입력 3</label>
+        <input type="text" id="tcl_in3_name" placeholder="HDMI 3" style="width:100px;margin-right:6px">
+        <input type="text" id="tcl_in3_cmd"  placeholder="HDMI3">
+      </div>
+      <div class="field"><label>입력 4</label>
+        <input type="text" id="tcl_in4_name" placeholder="PC" style="width:100px;margin-right:6px">
+        <input type="text" id="tcl_in4_cmd"  placeholder="VGA">
+      </div>
+    </section>
+
     <div class="cfg-actions">
       <button type="submit" class="btn-save">저장</button>
       <button type="button" class="btn-restart" id="btn-restart">서버 재시작</button>
@@ -118,7 +185,7 @@
   <div id="notice" class="notice hidden"></div>
 
   <div class="restart-note">
-    ⚡ 저장 즉시 반영 — ATEM IP/포트, 전환 속도, 동기화 주기, 소스 이름, 콘솔 창<br>
+    ⚡ 저장 즉시 반영 — ATEM IP/포트, 전환 속도, 동기화 주기, 소스 이름, 콘솔 창, TCL 설정<br>
     🔄 서버 재시작 필요 — 시뮬레이터 모드, 서버 포트
   </div>
 

@@ -58,6 +58,15 @@
   margin-bottom: 14px;
 }
 
+.section-sublabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--blue);
+  text-transform: uppercase;
+  margin: 14px 0 8px;
+}
+
 /* ── 필드 행 ── */
 .field {
   display: flex;
@@ -175,6 +184,8 @@ input[type="number"]:focus { border-color: var(--blue); }
   transition: opacity 0.1s;
 }
 .btn-save    { background: var(--blue);  color: #fff; }
+.btn-pair    { background: #1a2a3a; color: var(--blue); border: 1px solid var(--blue); padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: var(--mono); font-size: 11px; letter-spacing: 1px; }
+.btn-pair:hover { background: rgba(0,132,255,0.15); }
 .btn-restart { background: #1a3a1a;      color: var(--green); border: 1px solid #2a6a2a; }
 .btn-reset   { background: var(--dim);   color: var(--muted); border: 1px solid var(--border); }
 .btn-save:hover    { opacity: 0.85; }

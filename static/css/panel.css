@@ -54,6 +54,7 @@ header {
 
 .log-entry:first-child .log-msg { color: var(--text); }
 
+
 /* ── PiP 위치 바 ── */
 #pip-bar {
   display: flex;

@@ -341,6 +341,88 @@ function connectWS() {
   _ws.onerror = () => { _ws?.close(); };
 }
 
+// ── TCL TV 제어 ───────────────────────────────
+let tclSelectedTv = 0; // 0 = ALL
+
+async function loadTclPanel() {
+  const tvContainer  = document.getElementById('tcl-tv-btns');
+  const inContainer  = document.getElementById('tcl-input-btns');
+  const msg          = document.getElementById('tcl-msg');
+
+  const res = await call('GET', '/tcl/status');
+  if (!res) {
+    msg.textContent = 'TCL 상태를 불러오지 못했습니다.';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+
+  if (!res.enabled) {
+    msg.textContent = 'TCL 제어 비활성화 — 설정에서 활성화하세요.';
+    msg.style.color = 'var(--muted)';
+    return;
+  }
+
+  msg.textContent = '';
+
+  // TV 버튼 생성
+  tvContainer.innerHTML = '';
+  const allBtn = _tclBtn('ALL', () => _tclSelectTv(0), tclSelectedTv === 0);
+  tvContainer.appendChild(allBtn);
+  res.tvs.forEach((tv, i) => {
+    if (!tv.ip) return;
+    const btn = _tclBtn(tv.name, () => _tclSelectTv(i + 1), tclSelectedTv === i + 1);
+    btn.title = tv.ip;
+    tvContainer.appendChild(btn);
+  });
+
+  // 입력 버튼 생성
+  inContainer.innerHTML = '';
+  res.input_names.forEach((name, i) => {
+    if (!res.input_cmds[i]) return;
+    const btn = _tclBtn(name, () => tclSwitchInput(i + 1));
+    inContainer.appendChild(btn);
+  });
+}
+
+function _tclBtn(label, onClick, active = false) {
+  const b = document.createElement('button');
+  b.className = 'btn' + (active ? ' style-btn active' : ' style-btn');
+  b.style.cssText = 'margin-right:6px;margin-bottom:6px';
+  b.textContent = label;
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function _tclSelectTv(index) {
+  tclSelectedTv = index;
+  // 버튼 active 상태 갱신
+  const btns = document.getElementById('tcl-tv-btns').querySelectorAll('button');
+  btns.forEach((b, i) => {
+    const isActive = i === index;
+    b.classList.toggle('active', isActive);
+  });
+}
+
+async function tclSwitchInput(inputIndex) {
+  let res;
+  if (tclSelectedTv === 0) {
+    res = await call('POST', '/tcl/input/all', { input: inputIndex });
+  } else {
+    res = await call('POST', '/tcl/input', { tv: tclSelectedTv, input: inputIndex });
+  }
+  if (!res) return;
+
+  const msg = document.getElementById('tcl-msg');
+  if (res.results) {
+    msg.innerHTML = res.results.map(r =>
+      `<span style="color:${r.ok ? 'var(--green)' : 'var(--red)'}">${r.message}</span>`
+    ).join('<br>');
+  } else {
+    msg.textContent = res.message || '';
+    msg.style.color = res.ok ? 'var(--green)' : 'var(--red)';
+  }
+}
+
 // ── 초기화 ────────────────────────────────────
 setKeyerSrc(1);
 setPipSrc(1);
@@ -349,3 +431,4 @@ loadPresets();
 loadAtemAddr();                  // ATEM IP 표시 (header.js 제공)
 connectWS();                     // 이후 상태 변경은 WS로 수신
 setInterval(loadPresets, 10000); // 프리셋 목록 10초마다 갱신
+loadTclPanel();                  // TCL TV 패널 초기화

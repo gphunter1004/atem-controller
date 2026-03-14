@@ -23,6 +23,7 @@ header {
     "pgm    tran    keyer"
     "pvw    preset  pip"
     "pvw    preset  pip"
+    "tcl    tcl     tcl"
     "log    log     log";
   gap: 16px;
 }

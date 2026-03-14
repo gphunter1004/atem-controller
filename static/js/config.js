@@ -18,9 +18,23 @@ async function loadConfig() {
       document.getElementById(`name${i + 1}`).value = n;
     });
 
+    document.getElementById('tcl_enabled').checked = d.tcl_enabled ?? false;
+    document.getElementById('tcl_port').value       = d.tcl_port ?? 4001;
+    (d.tcl_tvs || []).forEach((tv, i) => {
+      document.getElementById(`tcl_tv${i + 1}_ip`).value   = tv.ip   ?? '';
+      document.getElementById(`tcl_tv${i + 1}_name`).value = tv.name ?? '';
+    });
+    (d.tcl_input_names || []).forEach((n, i) => {
+      document.getElementById(`tcl_in${i + 1}_name`).value = n;
+    });
+    (d.tcl_input_cmds || []).forEach((c, i) => {
+      document.getElementById(`tcl_in${i + 1}_cmd`).value = c;
+    });
+
     updateSimDesc();
     updateConsoleDesc();
     updateRateHint();
+    updateTclDesc();
     updateConfBadge(d.conf_exists, d.conf_file);
   } catch (e) {
     showNotice('설정을 불러오지 못했습니다: ' + e.message, true);
@@ -65,8 +79,18 @@ function updateRateHint() {
   document.getElementById('rate-hint').textContent = `≈ ${ms}ms`;
 }
 
+// ── TCL 활성화 설명 ────────────────────────────────────────────
+function updateTclDesc() {
+  const on   = document.getElementById('tcl_enabled').checked;
+  const desc = document.getElementById('tcl-enabled-desc');
+  if (!desc) return;
+  desc.textContent = on ? 'ON — TCL TV 제어 활성화' : 'OFF — TCL TV 제어 비활성화';
+  desc.style.color  = on ? 'var(--green)' : 'var(--muted)';
+}
+
 // ── 이벤트 ────────────────────────────────────────────────────
 document.getElementById('simulator_mode').addEventListener('change', updateSimDesc);
+document.getElementById('tcl_enabled').addEventListener('change', updateTclDesc);
 document.getElementById('show_console').addEventListener('change', updateConsoleDesc);
 document.getElementById('transition_rate_frames').addEventListener('input', updateRateHint);
 
@@ -88,6 +112,14 @@ document.getElementById('cfg-form').addEventListener('submit', async (e) => {
     device_sync_interval:   parseInt(document.getElementById('device_sync_interval').value),
     show_console:           document.getElementById('show_console').checked,
     source_names:           names,
+    tcl_enabled:            document.getElementById('tcl_enabled').checked,
+    tcl_port:               parseInt(document.getElementById('tcl_port').value) || 4001,
+    tcl_tvs:                [1, 2, 3].map(i => ({
+      ip:   document.getElementById(`tcl_tv${i}_ip`).value.trim(),
+      name: document.getElementById(`tcl_tv${i}_name`).value.trim() || `TV ${i}`,
+    })),
+    tcl_input_names:        [1, 2, 3, 4].map(i => document.getElementById(`tcl_in${i}_name`).value.trim() || `입력 ${i}`),
+    tcl_input_cmds:         [1, 2, 3, 4].map(i => document.getElementById(`tcl_in${i}_cmd`).value.trim()),
   };
 
   try {
@@ -161,6 +193,68 @@ function showNotice(msg, isError = false, persistent = false) {
   if (!persistent) {
     el._t = setTimeout(() => { el.className = 'notice hidden'; }, 5000);
   }
+}
+
+// ── TCL 페어링 ────────────────────────────────────────────────
+let _tclPairingTv = null;
+
+async function tclPairStart(tvIndex) {
+  const ip = document.getElementById(`tcl_tv${tvIndex}_ip`).value.trim();
+  if (!ip) { showNotice('먼저 IP 주소를 입력하세요.', true); return; }
+
+  _tclPairingTv = tvIndex;
+  const box = document.getElementById('tcl-pair-box');
+  const msg = document.getElementById('tcl-pair-msg');
+  box.style.display = '';
+  msg.textContent   = `TV ${tvIndex} (${ip}) — 연결 중...`;
+  document.getElementById('tcl-pair-pin').value = '';
+
+  try {
+    const res = await fetch(BASE + '/tcl/pair/start', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tv: tvIndex }),
+    });
+    const d = await res.json();
+    msg.textContent = d.ok
+      ? `${d.tv} — TV 화면에 표시된 PIN을 입력하세요.`
+      : `실패: ${d.message}`;
+    msg.style.color = d.ok ? 'var(--blue)' : 'var(--red, #f55)';
+    if (!d.ok) { box.style.display = 'none'; _tclPairingTv = null; }
+  } catch (e) {
+    msg.textContent = '오류: ' + e.message;
+    msg.style.color = 'var(--red, #f55)';
+  }
+}
+
+async function tclPairFinish() {
+  const pin = document.getElementById('tcl-pair-pin').value.trim();
+  if (!pin || !_tclPairingTv) return;
+
+  const msg = document.getElementById('tcl-pair-msg');
+  msg.textContent = '페어링 중...';
+
+  try {
+    const res = await fetch(BASE + '/tcl/pair/finish', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tv: _tclPairingTv, pin }),
+    });
+    const d = await res.json();
+    if (d.ok) {
+      showNotice(`${d.tv} 페어링 완료!`);
+      document.getElementById('tcl-pair-box').style.display = 'none';
+    } else {
+      msg.textContent = `실패: ${d.message}`;
+      msg.style.color = 'var(--red, #f55)';
+    }
+  } catch (e) {
+    msg.textContent = '오류: ' + e.message;
+  }
+  _tclPairingTv = null;
+}
+
+function tclPairCancel() {
+  document.getElementById('tcl-pair-box').style.display = 'none';
+  _tclPairingTv = null;
 }
 
 // ── 초기화 ────────────────────────────────────────────────────

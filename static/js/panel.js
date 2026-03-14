@@ -278,6 +278,7 @@ const PIP_SIZE = 0.25;
 
 function renderPipBar() {
   const bar = document.getElementById('pip-bar');
+  if (!bar) return;
   bar.innerHTML = '';
 
   for (const [key, p] of Object.entries(_pipPos)) {
@@ -301,12 +302,16 @@ async function activatePip(posKey, btn) {
   if (btn.disabled) return;
   btn.disabled = true;
   const p = _pipPos[posKey];
-  const src = status?.pip_src || 1;
+  const isPip = status?.keyer_mode === 'pip';
+  const url   = isPip ? BASE + '/key/pip/move' : BASE + '/key/pip';
+  const body  = isPip
+    ? { pos_x: p.x, pos_y: p.y }
+    : { source: status?.pip_src || 1, size: PIP_SIZE, pos_x: p.x, pos_y: p.y };
   try {
-    const res = await fetch(BASE + '/key/pip', {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: src, size: PIP_SIZE, pos_x: p.x, pos_y: p.y })
+      body: JSON.stringify(body)
     });
     if (res.ok) {
       status = await res.json();
