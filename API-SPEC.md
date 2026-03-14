@@ -354,6 +354,11 @@ TCL TV 입력 소스 전환 및 페어링.
 
 > `TCL_ENABLED = True`일 때만 동작합니다.
 
+> **모델 호환성 — 65P635 / 75P635**
+> 이 모델은 Google TV 기반으로 `androidtvremote2` 프로토콜이 홈 화면 이동만 지원합니다.
+> `KEYCODE_TV_INPUT_HDMI_*` 키코드는 **동작하지 않으며**, API 응답은 성공(`ok: true`)으로
+> 오지만 TV 화면이 변경되지 않습니다. 입력 전환이 필요하면 다른 모델을 사용하세요.
+
 ### `POST /tcl/input`
 
 특정 TV 입력 소스 전환.

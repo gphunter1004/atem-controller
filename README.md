@@ -255,6 +255,11 @@ python main.py
 
 모든 쓰기 API는 응답 시 현재 `state`를 함께 반환합니다. (TCL 제외)
 
+> **모델 호환성 주의**
+> TCL **65P635 / 75P635** 모델은 Google TV 기반으로, `androidtvremote2` 프로토콜이
+> 홈 화면 이동만 지원하고 **입력 소스 전환(`KEYCODE_TV_INPUT_HDMI_*`)은 동작하지 않음**.
+> 이 모델에서는 `/tcl/input` API가 응답은 성공으로 오지만 TV 화면이 변경되지 않음.
+
 ### 설정 (Config)
 
 | 메서드 | 경로 | 동작 |
