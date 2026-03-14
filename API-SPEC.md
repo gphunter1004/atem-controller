@@ -144,12 +144,16 @@ AUTO 전환 (설정된 스타일/속도로 PGM ↔ PVW 전환).
 
 ### `POST /key/up`
 
-업스트림 키어 ON (루마키).
+업스트림 키어 ON (루마키, 풀사이즈 오버레이).
 
 **요청:**
 ```json
 { "source": 2 }
 ```
+
+| 필드 | 타입 | 제약 |
+|------|------|------|
+| `source` | int | 1~4 |
 
 **응답:** StatusObject
 
@@ -251,9 +255,9 @@ PiP (DVE 키어) ON.
 | `pvw` | int (1~4) | — | PVW 소스 |
 | `keyer.mode` | `"keyup"` \| `"pip"` \| `"off"` | — | 키어 모드 |
 | `keyer.source` | int (1~4) | — | 키어 소스 |
-| `keyer.size` | float | — | DVE 크기 |
-| `keyer.pos_x` | float | — | DVE X 위치 |
-| `keyer.pos_y` | float | — | DVE Y 위치 |
+| `keyer.size` | float | — | DVE 크기 (pip 전용) |
+| `keyer.pos_x` | float | — | DVE X 위치 (pip 전용) |
+| `keyer.pos_y` | float | — | DVE Y 위치 (pip 전용) |
 | `confirm` | bool | — | true = 두 번 클릭 필요 |
 
 **응답:**
@@ -282,7 +286,7 @@ PiP (DVE 키어) ON.
 
 **응답:** StatusObject
 
-**오류:** `404` — 존재하지 않는 프리셋
+**오류:** `404` — 존재하지 않는 프리셋, `500` — 실행 실패
 
 ---
 
@@ -290,7 +294,7 @@ PiP (DVE 키어) ON.
 
 ### `POST /admin/connect`
 
-ATEM 장비 수동 재연결 (10초 타임아웃).
+ATEM 장비 수동 재연결 (10초 타임아웃 1회 시도).
 
 **응답 (성공):** StatusObject + `"ok": true`
 
@@ -337,7 +341,7 @@ ATEM 장비 수동 재연결 (10초 타임아웃).
   "simulator_mode": false,
   "api_port": 8000,
   "transition_rate_frames": 15,
-  "device_sync_interval": 1,
+  "device_sync_interval": 2,
   "show_console": false,
   "source_names": ["소스1(Camera)", "소스2(PPT)", "소스3(없음)", "소스4(없음)"],
   "conf_file": "C:\\Program Files\\Atem Controller\\atem.conf",
@@ -349,7 +353,7 @@ ATEM 장비 수동 재연결 (10초 타임아웃).
 
 ### `POST /api/config`
 
-설정 저장 및 즉시 반영.
+설정 저장 및 즉시 반영 가능한 항목 적용.
 
 **요청:**
 ```json
@@ -359,22 +363,22 @@ ATEM 장비 수동 재연결 (10초 타임아웃).
   "simulator_mode": false,
   "api_port": 8000,
   "transition_rate_frames": 15,
-  "device_sync_interval": 1,
+  "device_sync_interval": 2,
   "show_console": false,
   "source_names": ["소스1", "소스2", "소스3", "소스4"]
 }
 ```
 
-| 필드 | 즉시 반영 | 설명 |
-|------|-----------|------|
-| `atem_ip` | ⚡ | ATEM IP 주소 |
-| `atem_port` | ⚡ | ATEM 포트 (기본 9910) |
-| `transition_rate_frames` | ⚡ | AUTO 전환 속도 (프레임, 1~300) |
-| `device_sync_interval` | ⚡ | 장비 상태 동기화 주기 (초, 1~60) |
-| `show_console` | ⚡ | 콘솔 창 표시 (EXE 환경만) |
-| `source_names` | ⚡ | 소스 이름 4개 |
-| `simulator_mode` | 🔄 재시작 필요 | 시뮬레이터 모드 |
-| `api_port` | 🔄 재시작 필요 | 서버 포트 |
+| 필드 | 즉시 반영 | 제약 | 설명 |
+|------|-----------|------|------|
+| `atem_ip` | ⚡ | — | ATEM IP 주소 |
+| `atem_port` | ⚡ | 1~65535 | ATEM UDP 포트 (기본 9910) |
+| `transition_rate_frames` | ⚡ | 1~300 | AUTO 전환 속도 (프레임) |
+| `device_sync_interval` | ⚡ | 1~60 | 장비 상태 동기화 주기 (초) |
+| `show_console` | ⚡ | — | 콘솔 창 표시 (EXE 환경만) |
+| `source_names` | ⚡ | 4개 배열 | 소스 이름 |
+| `simulator_mode` | 🔄 재시작 필요 | — | 시뮬레이터 모드 |
+| `api_port` | 🔄 재시작 필요 | 1~65535 | 서버 포트 |
 
 **응답:**
 ```json
@@ -444,10 +448,10 @@ ATEM 장비 수동 재연결 (10초 타임아웃).
 
 ## 페이지 라우트
 
-| URL | 설명 |
-|-----|------|
-| `GET /` | 홈 메뉴 |
-| `GET /ui` | 메인 컨트롤 UI |
-| `GET /panel` | 프리셋 패널 |
-| `GET /config` | 설정 페이지 |
-| `GET /menu` | 홈 메뉴 |
+| URL | 파일 | 설명 |
+|-----|------|------|
+| `GET /` | `preset_panel.html` | 프리셋 패널 (기본 화면) |
+| `GET /ui` | `atem_ui.html` | 메인 컨트롤 UI |
+| `GET /panel` | `preset_panel.html` | 프리셋 패널 |
+| `GET /config` | `config.html` | 설정 페이지 |
+| `GET /menu` | `index.html` | 메뉴 페이지 |
