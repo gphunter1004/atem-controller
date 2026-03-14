@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATEM — 설정</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/config.css">
+</head>
+<body>
+
+<div class="cfg-wrap">
+
+  <nav class="cfg-nav">
+    <span class="cfg-title">⚙ SETTINGS</span>
+    <span id="conf-badge"></span>
+    <a href="/menu" class="nav-btn">HOME</a>
+  </nav>
+
+  <div id="conf-path-bar"></div>
+
+  <form id="cfg-form">
+
+    <!-- ATEM 장비 -->
+    <section class="cfg-section">
+      <div class="section-label">ATEM 장비</div>
+
+      <div class="field">
+        <span class="instant-apply" title="저장 즉시 반영">⚡</span>
+        <label for="atem_ip">IP 주소</label>
+        <input type="text" id="atem_ip" placeholder="192.168.0.240" spellcheck="false">
+      </div>
+
+      <div class="field">
+        <span class="instant-apply" title="저장 즉시 반영">⚡</span>
+        <label for="atem_port">포트</label>
+        <input type="number" id="atem_port" min="1" max="65535" placeholder="9910">
+      </div>
+
+      <div class="field">
+        <span class="restart-req" title="서버 재시작 후 반영">🔄</span>
+        <label for="simulator_mode">시뮬레이터 모드</label>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="simulator_mode">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-desc" id="sim-desc"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 서버 -->
+    <section class="cfg-section">
+      <div class="section-label">서버</div>
+
+      <div class="field">
+        <span class="restart-req" title="서버 재시작 후 반영">🔄</span>
+        <label for="api_port">포트</label>
+        <input type="number" id="api_port" min="1" max="65535">
+      </div>
+
+      <div class="field">
+        <span class="instant-apply" title="저장 즉시 반영">⚡</span>
+        <label for="show_console">콘솔 창</label>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="show_console">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-desc" id="console-desc"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 전환 설정 -->
+    <section class="cfg-section">
+      <div class="section-label">전환</div>
+
+      <div class="field">
+        <span class="instant-apply" title="저장 즉시 반영">⚡</span>
+        <label for="transition_rate_frames">AUTO 전환 속도</label>
+        <div class="input-with-hint">
+          <input type="number" id="transition_rate_frames" min="1" max="300">
+          <span class="unit">프레임</span>
+          <span class="hint" id="rate-hint"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="instant-apply" title="저장 즉시 반영">⚡</span>
+        <label for="device_sync_interval">장비 동기화 주기</label>
+        <div class="input-with-hint">
+          <input type="number" id="device_sync_interval" min="1" max="60">
+          <span class="unit">초</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 소스 이름 -->
+    <section class="cfg-section">
+      <div class="section-label">소스 이름</div>
+
+      <div class="field"><span class="instant-apply" title="저장 즉시 반영">⚡</span><label for="name1">소스 1</label><input type="text" id="name1"></div>
+      <div class="field"><span class="instant-apply" title="저장 즉시 반영">⚡</span><label for="name2">소스 2</label><input type="text" id="name2"></div>
+      <div class="field"><span class="instant-apply" title="저장 즉시 반영">⚡</span><label for="name3">소스 3</label><input type="text" id="name3"></div>
+      <div class="field"><span class="instant-apply" title="저장 즉시 반영">⚡</span><label for="name4">소스 4</label><input type="text" id="name4"></div>
+    </section>
+
+    <div class="cfg-actions">
+      <button type="submit" class="btn-save">저장</button>
+      <button type="button" class="btn-restart" id="btn-restart">서버 재시작</button>
+      <button type="button" class="btn-reset" id="btn-reset">기본값으로 초기화</button>
+    </div>
+
+  </form>
+
+  <div id="notice" class="notice hidden"></div>
+
+  <div class="restart-note">
+    ⚡ 저장 즉시 반영 — ATEM IP/포트, 전환 속도, 동기화 주기, 소스 이름, 콘솔 창<br>
+    🔄 서버 재시작 필요 — 시뮬레이터 모드, 서버 포트
+  </div>
+
+</div>
+
+<script src="/static/js/config.js"></script>
+</body>
+</html>

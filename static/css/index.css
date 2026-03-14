@@ -1,0 +1,77 @@
+/* ── 바디 ── */
+html, body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+}
+
+/* ── 헤더 ── */
+header { text-align: center; }
+
+header h1 {
+  font-family: var(--mono);
+  font-size: 22px;
+  color: var(--red);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+header p {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* ── 카드 목록 ── */
+.cards {
+  display: flex;
+  gap: 24px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 220px;
+  height: 180px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.card:hover { transform: translateY(-4px); }
+
+.card.main:hover   { border-color: var(--blue);   box-shadow: 0 8px 32px rgba(0,132,255,0.2); }
+.card.panel:hover  { border-color: var(--yellow);  box-shadow: 0 8px 32px rgba(255,214,0,0.2); }
+.card.config:hover { border-color: var(--muted);   box-shadow: 0 8px 32px rgba(74,85,104,0.25); }
+
+.card-icon  { font-size: 40px; line-height: 1; }
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.card-desc {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.card.main   .card-title { color: var(--blue); }
+.card.panel  .card-title { color: var(--yellow); }
+.card.config .card-title { color: var(--muted); }

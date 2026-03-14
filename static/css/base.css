@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+
+/* ── 공통 변수 ── */
+:root {
+  --bg:     #0a0c0f;
+  --panel:  #111418;
+  --border: #1e2530;
+  --red:    #e8003d;
+  --green:  #00e87a;
+  --blue:   #0084ff;
+  --yellow: #ffd600;
+  --dim:    #2a3040;
+  --text:   #c8d4e8;
+  --muted:  #4a5568;
+  --mono:   'Share Tech Mono', monospace;
+  --sans:   'Rajdhani', sans-serif;
+}
+
+/* ── 리셋 ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── 기본 바디 ── */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+/* ── 공통 네비 버튼 (HOME / SYNC) ── */
+.nav-btn,
+.refresh-btn,
+.home-btn {
+  display: inline-block;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: all 0.1s;
+}
+.nav-btn:hover,
+.refresh-btn:hover,
+.home-btn:hover { color: var(--text); border-color: var(--text); }
+
+/* ── 연결 상태 dot 레이블 ── */
+.dot-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ── 구분선 ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+/* ── 공통 헤더: 접속 정보 ── */
+#conn-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+#conn-info .ws-dot,
+#conn-info .atem-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 5px var(--red);
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+#conn-info.ws-online   .ws-dot   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+#conn-info.atem-online .atem-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+#conn-info .conn-id  { color: var(--blue); }
+#conn-info .ws-count { color: var(--muted); margin-left: 2px; }
+
+/* ── 공통 헤더: 우측 그룹 ── */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#atem-addr {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+/* ── 공통 헤더: 재연결 버튼 ── */
+#reconnect-btn {
+  display: none;
+  padding: 5px 12px;
+  background: rgba(232,0,61,0.12);
+  border: 1px solid var(--red);
+  border-radius: 6px;
+  color: var(--red);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+
+#reconnect-btn:hover    { background: rgba(232,0,61,0.22); }
+#reconnect-btn:active   { transform: scale(0.95); }
+#reconnect-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+body.atem-offline #reconnect-btn { display: block; }

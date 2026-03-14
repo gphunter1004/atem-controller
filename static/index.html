@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATEM Mini Controller</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/index.css">
+</head>
+<body>
+
+<header>
+  <h1>⬛ ATEM Mini Controller</h1>
+  <p id="host-info">Loading...</p>
+</header>
+
+<div class="cards">
+  <a class="card main" href="/ui">
+    <div class="card-icon">🎛</div>
+    <div class="card-title">메인 컨트롤러</div>
+    <div class="card-desc">PGM / PVW / KEYER<br>TRANSITION / PRESET</div>
+  </a>
+  <a class="card panel" href="/panel">
+    <div class="card-icon">⬛</div>
+    <div class="card-title">프리셋 패널</div>
+    <div class="card-desc">프리셋 전용 화면<br>터치 / 보조 모니터</div>
+  </a>
+  <a class="card config" href="/config">
+    <div class="card-icon">⚙</div>
+    <div class="card-title">설정</div>
+    <div class="card-desc">ATEM IP / 소스 이름<br>서버 포트 / 전환 속도</div>
+  </a>
+</div>
+
+<script src="/static/js/index.js"></script>
+</body>
+</html>

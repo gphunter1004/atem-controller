@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATEM Mini Controller</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/ui.css">
+</head>
+<body>
+
+<header>
+  <span id="conn-info"></span>
+  <div class="header-right">
+    <span id="atem-addr"></span>
+    <button id="reconnect-btn" onclick="reconnect()">재연결</button>
+    <a class="nav-btn" href="/menu">HOME</a>
+  </div>
+</header>
+
+<!-- 상태 표시 -->
+<div class="status-panel" style="margin-bottom:16px">
+  <div class="status-row">
+    <div class="status-item">
+      <span class="k">PGM</span>
+      <span class="v pgm" id="s-pgm">—</span>
+    </div>
+    <div class="status-item">
+      <span class="k">PVW</span>
+      <span class="v pvw" id="s-pvw">—</span>
+    </div>
+    <div class="status-item">
+      <span class="k">KEYER</span>
+      <span class="v" id="s-keyer">—</span>
+    </div>
+    <div class="status-item">
+      <span class="k">TRAN</span>
+      <span class="v" id="s-tran">—</span>
+    </div>
+    <div class="status-item" style="flex:1">
+      <span class="k">MODE</span>
+      <span class="v mode" id="s-mode">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- PGM 직접 출력 -->
+  <div class="panel" style="grid-area:pgm">
+    <div class="panel-title red">PGM DIRECT</div>
+    <div class="source-grid" id="pgm-grid">
+      <button class="src-btn" onclick="directPgm(1)">1<span class="label">PGM</span></button>
+      <button class="src-btn" onclick="directPgm(2)">2<span class="label">PGM</span></button>
+      <button class="src-btn" onclick="directPgm(3)">3<span class="label">PGM</span></button>
+      <button class="src-btn" onclick="directPgm(4)">4<span class="label">PGM</span></button>
+    </div>
+  </div>
+
+  <!-- PVW -->
+  <div class="panel" style="grid-area:pvw">
+    <div class="panel-title active">PVW</div>
+    <div class="source-grid" id="pvw-grid">
+      <button class="src-btn" onclick="setPvw(1)">1<span class="label">PVW</span></button>
+      <button class="src-btn" onclick="setPvw(2)">2<span class="label">PVW</span></button>
+      <button class="src-btn" onclick="setPvw(3)">3<span class="label">PVW</span></button>
+      <button class="src-btn" onclick="setPvw(4)">4<span class="label">PVW</span></button>
+    </div>
+  </div>
+
+  <!-- 전환 -->
+  <div class="panel" style="grid-area:tran">
+    <div class="panel-title">TRANSITION</div>
+    <div class="btn-row">
+      <button class="btn cut"  id="btn-cut"  onclick="doTransition('cut')">✂ CUT</button>
+      <button class="btn auto" id="btn-auto" onclick="doTransition('auto')">▶ AUTO</button>
+    </div>
+    <hr class="divider">
+    <div class="btn-row">
+      <button class="btn style-btn" id="style-MIX"   onclick="setTransStyle('MIX')">MIX</button>
+      <button class="btn style-btn" id="style-DIP"   onclick="setTransStyle('DIP')">DIP</button>
+      <button class="btn style-btn" id="style-WIPE"  onclick="setTransStyle('WIPE')">WIPE</button>
+      <button class="btn style-btn" id="style-STING" onclick="setTransStyle('STING')">STING</button>
+    </div>
+  </div>
+
+  <!-- 프리셋 -->
+  <div class="panel" style="grid-area:preset">
+    <div class="panel-title">PRESET</div>
+    <div id="preset-list"></div>
+    <hr class="divider">
+    <div class="preset-add">
+      <input type="text" id="preset-name" class="preset-name-input" placeholder="프리셋 이름">
+      <input type="text" id="preset-desc" class="preset-name-input" placeholder="설명 (선택)">
+      <button class="btn preset" onclick="savePreset()">+ 현재 상태 저장</button>
+      <button class="btn reload" onclick="reloadPresets()">↺ 프리셋 목록 새로고침</button>
+    </div>
+  </div>
+
+  <!-- KEY UP -->
+  <div class="panel" style="grid-area:keyer">
+    <div class="panel-title blue">KEY UP</div>
+    <div class="panel-title" style="margin-bottom:8px">소스</div>
+    <div class="source-grid" id="keyer-src-grid" style="margin-bottom:10px">
+      <button class="src-btn" onclick="setKeyerSrc(1)" style="aspect-ratio:auto;padding:8px;font-size:16px">1</button>
+      <button class="src-btn" onclick="setKeyerSrc(2)" style="aspect-ratio:auto;padding:8px;font-size:16px">2</button>
+      <button class="src-btn" onclick="setKeyerSrc(3)" style="aspect-ratio:auto;padding:8px;font-size:16px">3</button>
+      <button class="src-btn" onclick="setKeyerSrc(4)" style="aspect-ratio:auto;padding:8px;font-size:16px">4</button>
+    </div>
+    <button class="btn keyup" id="btn-keyup" onclick="keyUp()">KEY UP (소스 <span id="keyup-src">1</span>)</button>
+  </div>
+
+  <!-- PiP -->
+  <div class="panel" style="grid-area:pip">
+    <div class="panel-title blue">PiP</div>
+    <div class="panel-title" style="margin-bottom:8px">소스</div>
+    <div class="source-grid" id="pip-src-grid" style="margin-bottom:10px">
+      <button class="src-btn" onclick="setPipSrc(1)" style="aspect-ratio:auto;padding:8px;font-size:16px">1</button>
+      <button class="src-btn" onclick="setPipSrc(2)" style="aspect-ratio:auto;padding:8px;font-size:16px">2</button>
+      <button class="src-btn" onclick="setPipSrc(3)" style="aspect-ratio:auto;padding:8px;font-size:16px">3</button>
+      <button class="src-btn" onclick="setPipSrc(4)" style="aspect-ratio:auto;padding:8px;font-size:16px">4</button>
+    </div>
+    <button class="btn pip" id="btn-pip" onclick="pipOn()">PiP ON (소스 <span id="pip-src-label">1</span>)</button>
+
+    <!-- PiP 설정 -->
+    <div class="pip-config">
+      <div class="slider-row">
+        <label>SIZE</label>
+        <input type="range" id="pip-size" min="10" max="80" value="25"
+               oninput="document.getElementById('pip-size-v').textContent=this.value+'%'">
+        <span class="slider-val" id="pip-size-v">25%</span>
+      </div>
+    </div>
+
+    <!-- 위치 프리셋 -->
+    <div class="pos-grid">
+      <button class="pos-btn"     onclick="setPipPos('tl', event)">↖ 좌상단</button>
+      <button class="pos-btn sel" onclick="setPipPos('tr', event)">↗ 우상단</button>
+      <button class="pos-btn"     onclick="setPipPos('bl', event)">↙ 좌하단</button>
+      <button class="pos-btn"     onclick="setPipPos('br', event)">↘ 우하단</button>
+    </div>
+
+    <hr class="divider">
+    <button class="btn off" id="btn-keyoff" onclick="keyOff()">KEY OFF</button>
+  </div>
+
+  <!-- 로그 -->
+  <div class="log-panel" id="log" style="grid-area:log">
+    <div class="log-line"><span class="ts">--:--:--</span><span class="msg">ATEM Mini Controller 준비됨</span></div>
+  </div>
+
+</div>
+
+<script src="/static/js/header.js"></script>
+<script src="/static/js/ui.js"></script>
+</body>
+</html>

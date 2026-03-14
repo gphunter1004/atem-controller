@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Logs
+*.log
+atem_console.log
+
+# Build & Distribution
+build/
+dist/
+
+# Edge browser profile (runtime data)
+edge-profile/
+
+# Backup
+backup/
+
+# PyInstaller spec (generated)
+atem.spec
+
+# Runtime config (contains local IP addresses)
+atem.conf
+
+# Claude memory
+.claude/

@@ -1,0 +1,217 @@
+/* ── 레이아웃 ── */
+.cfg-wrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+/* ── 네비 ── */
+.cfg-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cfg-title {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--text);
+  flex: 1;
+}
+
+#conf-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+#conf-badge.custom  { background: #0a2a10; color: var(--green); border: 1px solid #1a5c20; }
+#conf-badge.default { background: #1a1a0a; color: var(--yellow); border: 1px solid #3a3010; }
+
+/* ── conf 파일 경로 ── */
+#conf-path-bar {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  word-break: break-all;
+}
+
+/* ── 섹션 ── */
+.cfg-section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* ── 필드 행 ── */
+.field {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.field:last-child { border-bottom: none; }
+
+.field > label {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--text);
+  min-width: 148px;
+  flex-shrink: 0;
+}
+
+/* ── 입력 ── */
+input[type="text"],
+input[type="number"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 6px 10px;
+  width: 180px;
+  outline: none;
+  transition: border-color 0.1s;
+}
+input[type="text"]:focus,
+input[type="number"]:focus { border-color: var(--blue); }
+
+/* ── 입력 + 단위/힌트 ── */
+.input-with-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.unit {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.hint {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--blue);
+}
+
+/* ── 토글 스위치 ── */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.toggle input { display: none; }
+.slider {
+  position: absolute;
+  inset: 0;
+  background: var(--dim);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.slider::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+.toggle input:checked + .slider { background: var(--blue); }
+.toggle input:checked + .slider::before {
+  transform: translateX(20px);
+  background: #fff;
+}
+.toggle-desc {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── 버튼 ── */
+.cfg-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-save,
+.btn-restart,
+.btn-reset {
+  padding: 9px 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: opacity 0.1s;
+}
+.btn-save    { background: var(--blue);  color: #fff; }
+.btn-restart { background: #1a3a1a;      color: var(--green); border: 1px solid #2a6a2a; }
+.btn-reset   { background: var(--dim);   color: var(--muted); border: 1px solid var(--border); }
+.btn-save:hover    { opacity: 0.85; }
+.btn-restart:hover { background: #204a20; color: #fff; }
+.btn-restart:disabled { opacity: 0.45; cursor: default; }
+.btn-reset:hover   { color: var(--text); }
+
+/* ── 알림 ── */
+.notice {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+.notice.hidden  { display: none; }
+.notice.ok      { background: #0a2a10; border: 1px solid #1a5c20; color: var(--green); }
+.notice.error   { background: #2a0a0a; border: 1px solid #5c1a1a; color: #ff6b6b; }
+
+/* ── 즉시 적용 / 재시작 필요 이모지 배지 ── */
+.instant-apply,
+.restart-req {
+  font-size: 13px;
+  width: 22px;
+  flex-shrink: 0;
+  text-align: center;
+  line-height: 1;
+}
+
+
+/* ── 하단 안내 ── */
+.restart-note {
+  margin-top: 24px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+}

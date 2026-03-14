@@ -1,0 +1,21 @@
+[atem]
+ip = 192.168.0.xxx
+port = 9910
+simulator_mode = false
+
+[server]
+host = 0.0.0.0
+port = 8000
+
+[switching]
+transition_rate_frames = 15
+device_sync_interval = 1
+
+[app]
+show_console = false
+
+[sources]
+name1 = 소스1
+name2 = 소스2
+name3 = 소스3
+name4 = 소스4
