@@ -24,5 +24,9 @@ atem.spec
 # Runtime config (contains local IP addresses)
 atem.conf
 
+# TLS certificates & keys
+*.pem
+*.key
+
 # Claude memory
 .claude/
