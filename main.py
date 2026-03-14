@@ -15,6 +15,7 @@ _config.apply_console_visibility(_config.SHOW_CONSOLE)
 from controller.atem_controller import atem
 from router import switching, keyer, system, ws as ws_router
 from router import config_router
+from router import tcl_router
 import uvicorn
 
 logger = logging.getLogger("atem")
@@ -220,16 +221,12 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    connect_task.cancel()
-    try:
-        await connect_task
-    except (asyncio.CancelledError, Exception):
-        pass
-    sync_task.cancel()
-    try:
-        await sync_task
-    except asyncio.CancelledError:
-        pass
+    for task in (connect_task, sync_task):
+        task.cancel()
+        try:
+            await asyncio.wait_for(asyncio.shield(task), timeout=1.5)
+        except (asyncio.CancelledError, asyncio.TimeoutError, Exception):
+            pass
     if udp_server:
         udp_server.stop()
     logger.info("서버 종료")
@@ -277,6 +274,7 @@ app.include_router(keyer.router)
 app.include_router(system.router)
 app.include_router(ws_router.router)
 app.include_router(config_router.router)
+app.include_router(tcl_router.router)
 
 async def main():
     log_file, console_log_file = _setup_logging()
@@ -291,6 +289,22 @@ async def main():
         reload=False,
     )
     server = uvicorn.Server(config)
+
+    # Windows: Ctrl+C 시 uvicorn에 종료 신호 전달.
+    # lifespan 정리가 3초 내 완료 안 되면 강제 종료.
+    if sys.platform == "win32":
+        import signal, threading, os
+
+        def _sigint(sig, frame):
+            server.should_exit = True
+            def _force():
+                import time
+                time.sleep(3)
+                os._exit(0)
+            threading.Thread(target=_force, daemon=True).start()
+
+        signal.signal(signal.SIGINT, _sigint)
+
     try:
         await server.serve()
     except KeyboardInterrupt:

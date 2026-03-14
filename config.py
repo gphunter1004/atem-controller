@@ -26,6 +26,16 @@ SOURCE_NAMES           = [
     _cp.get('sources', 'name4'),
 ]
 
+# ── TCL TV ────────────────────────────────────────────────────
+TCL_ENABLED        = _cp.getboolean('tcl', 'enabled')
+TCL_PORT           = _cp.getint('tcl', 'port')
+TCL_TVS            = [
+    {"ip": _cp.get('tcl', f'tv{i}_ip'),   "name": _cp.get('tcl', f'tv{i}_name')}
+    for i in range(1, 4)
+]
+TCL_INPUT_NAMES    = [_cp.get('tcl', f'input{i}_name') for i in range(1, 5)]
+TCL_INPUT_COMMANDS = [_cp.get('tcl', f'input{i}_cmd')  for i in range(1, 5)]
+
 
 def apply_console_visibility(show: bool) -> None:
     """EXE 실행 시 콘솔 창 표시/숨김 (Windows, frozen 환경에서만 동작)."""
@@ -56,4 +66,13 @@ def reload() -> None:
         cp.get('sources', 'name3'),
         cp.get('sources', 'name4'),
     ]
+    global TCL_ENABLED, TCL_PORT, TCL_TVS, TCL_INPUT_NAMES, TCL_INPUT_COMMANDS
+    TCL_ENABLED        = cp.getboolean('tcl', 'enabled')
+    TCL_PORT           = cp.getint('tcl', 'port')
+    TCL_TVS            = [
+        {"ip": cp.get('tcl', f'tv{i}_ip'), "name": cp.get('tcl', f'tv{i}_name')}
+        for i in range(1, 4)
+    ]
+    TCL_INPUT_NAMES    = [cp.get('tcl', f'input{i}_name') for i in range(1, 5)]
+    TCL_INPUT_COMMANDS = [cp.get('tcl', f'input{i}_cmd')  for i in range(1, 5)]
     apply_console_visibility(SHOW_CONSOLE)

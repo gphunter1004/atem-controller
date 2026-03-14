@@ -9,6 +9,11 @@ from conf_manager import load, save_conf, delete_conf, CONF_PATH
 router = APIRouter(prefix="/api/config", tags=["Config"])
 
 
+class TCLTVItem(BaseModel):
+    ip:   str
+    name: str
+
+
 class ConfigBody(BaseModel):
     atem_ip:                str
     atem_port:              int   = Field(ge=1,   le=65535)
@@ -18,6 +23,11 @@ class ConfigBody(BaseModel):
     device_sync_interval:   int   = Field(ge=1,   le=60)
     show_console:           bool  = True
     source_names:           List[str]
+    tcl_enabled:            bool  = False
+    tcl_port:               int   = Field(default=4001, ge=1, le=65535)
+    tcl_tvs:                List[TCLTVItem]
+    tcl_input_names:        List[str]
+    tcl_input_cmds:         List[str]
 
 
 # ── 현재 설정 조회 ────────────────────────────────────────────────
@@ -39,6 +49,14 @@ def get_config():
             cp.get('sources', 'name3'),
             cp.get('sources', 'name4'),
         ],
+        "tcl_enabled":      cp.getboolean('tcl', 'enabled'),
+        "tcl_port":         cp.getint('tcl', 'port'),
+        "tcl_tvs": [
+            {"ip": cp.get('tcl', f'tv{i}_ip'), "name": cp.get('tcl', f'tv{i}_name')}
+            for i in range(1, 4)
+        ],
+        "tcl_input_names":  [cp.get('tcl', f'input{i}_name') for i in range(1, 5)],
+        "tcl_input_cmds":   [cp.get('tcl', f'input{i}_cmd')  for i in range(1, 5)],
         "conf_file":   CONF_PATH,
         "conf_exists": os.path.exists(CONF_PATH),
     }
@@ -66,6 +84,14 @@ def post_config(body: ConfigBody):
             'show_console': str(body.show_console).lower(),
         },
         'sources': {f'name{i + 1}': body.source_names[i] for i in range(4)},
+        'tcl': {
+            'enabled': str(body.tcl_enabled).lower(),
+            'port':    str(body.tcl_port),
+            **{f'tv{i + 1}_ip':   body.tcl_tvs[i].ip   for i in range(len(body.tcl_tvs))},
+            **{f'tv{i + 1}_name': body.tcl_tvs[i].name for i in range(len(body.tcl_tvs))},
+            **{f'input{i + 1}_name': body.tcl_input_names[i] for i in range(len(body.tcl_input_names))},
+            **{f'input{i + 1}_cmd':  body.tcl_input_cmds[i]  for i in range(len(body.tcl_input_cmds))},
+        },
     })
     import config as _config
     _config.reload()

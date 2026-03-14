@@ -63,6 +63,24 @@ _DEFAULTS: dict[str, dict[str, str]] = {
         'name3': '소스3(없음)',
         'name4': '소스4(없음)',
     },
+    'tcl': {
+        'enabled':      'false',
+        'port':         '6466',
+        'tv1_ip':       '',
+        'tv1_name':     'TV 1',
+        'tv2_ip':       '',
+        'tv2_name':     'TV 2',
+        'tv3_ip':       '',
+        'tv3_name':     'TV 3',
+        'input1_name':  'HDMI 1',
+        'input1_cmd':   'KEYCODE_TV_INPUT_HDMI_1',
+        'input2_name':  'HDMI 2',
+        'input2_cmd':   'KEYCODE_TV_INPUT_HDMI_2',
+        'input3_name':  'HDMI 3',
+        'input3_cmd':   'KEYCODE_TV_INPUT_HDMI_3',
+        'input4_name':  'HDMI 4',
+        'input4_cmd':   'KEYCODE_TV_INPUT_HDMI_4',
+    },
 }
 
 
